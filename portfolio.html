@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Art Portfolio — 创意作品集</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@200;300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap');
+
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --rose:#c9a4a0;--rose-light:#e8d5d3;--rose-deep:#a07874;
+  --ink:#2c2c2c;--ink-light:#5a5a5a;--ink-lighter:#8a8a8a;
+  --cream:#faf6f2;--cream-dark:#f0ebe5;--gold:#c4a265;
+  --sand:#d4c5b5;--mist:#e8e2dc;
+  --font-display:'Playfair Display',serif;
+  --font-body:'Noto Serif SC',serif;
+}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{font-family:var(--font-body);background:var(--cream);color:var(--ink);cursor:default}
+
+/* ===== 自定义光标 ===== */
+.cursor-dot{position:fixed;width:8px;height:8px;background:var(--rose);border-radius:50%;pointer-events:none;z-index:9999;transition:transform .15s;mix-blend-mode:difference}
+.cursor-ring{position:fixed;width:40px;height:40px;border:1.5px solid var(--rose);border-radius:50%;pointer-events:none;z-index:9998;transition:transform .3s, width .3s, height .3s;transform:translate(-16px,-16px)}
+
+/* ===== 加载页面 ===== */
+.loader{position:fixed;inset:0;background:var(--cream);z-index:10000;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity .8s,visibility .8s}
+.loader.hidden{opacity:0;visibility:hidden}
+.loader-text{font-family:var(--font-display);font-size:clamp(24px,5vw,48px);color:var(--ink);letter-spacing:8px;overflow:hidden}
+.loader-text span{display:inline-block;animation:slideUp 0.6s ease forwards;opacity:0;transform:translateY(100%)}
+@keyframes slideUp{to{opacity:1;transform:translateY(0)}}
+.loader-line{width:120px;height:1px;background:var(--rose);margin-top:30px;position:relative;overflow:hidden}
+.loader-line::after{content:'';position:absolute;left:-100%;width:100%;height:100%;background:var(--gold);animation:loaderSlide 2s ease infinite}
+@keyframes loaderSlide{to{left:100%}}
+
+/* ===== 导航 ===== */
+nav{position:fixed;top:0;left:0;width:100%;padding:24px 48px;display:flex;justify-content:space-between;align-items:center;z-index:1000;transition:all .4s}
+nav.scrolled{background:rgba(250,246,242,.92);backdrop-filter:blur(20px);padding:16px 48px;box-shadow:0 1px 30px rgba(0,0,0,.04)}
+.nav-logo{font-family:var(--font-display);font-size:20px;font-weight:500;letter-spacing:3px;color:var(--ink)}
+.nav-links{display:flex;gap:36px;list-style:none}
+.nav-links a{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--ink-light);text-decoration:none;position:relative;transition:color .3s}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--rose);transition:width .3s}
+.nav-links a:hover{color:var(--ink)}
+.nav-links a:hover::after{width:100%}
+
+/* 移动端菜单 */
+.menu-toggle{display:none;flex-direction:column;gap:6px;cursor:pointer;z-index:1001}
+.menu-toggle span{width:28px;height:1.5px;background:var(--ink);transition:all .3s}
+.mobile-menu{display:none;position:fixed;inset:0;background:var(--cream);z-index:999;flex-direction:column;align-items:center;justify-content:center;gap:32px}
+.mobile-menu.active{display:flex}
+.mobile-menu a{font-family:var(--font-display);font-size:28px;color:var(--ink);text-decoration:none;letter-spacing:4px;transition:color .3s}
+.mobile-menu a:hover{color:var(--rose)}
+
+/* ===== Hero ===== */
+.hero{height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+.hero-bg{position:absolute;inset:0}
+.hero-bg canvas{width:100%;height:100%}
+.hero-content{position:relative;text-align:center;z-index:2}
+.hero-subtitle{font-size:12px;letter-spacing:8px;text-transform:uppercase;color:var(--ink-lighter);margin-bottom:24px;opacity:0;animation:fadeInUp .8s ease 2.2s forwards}
+.hero-title{font-family:var(--font-display);font-size:clamp(48px,10vw,140px);font-weight:300;line-height:1;letter-spacing:-2px;color:var(--ink);opacity:0;animation:fadeInUp .8s ease 2.4s forwards}
+.hero-title em{font-style:italic;font-weight:400;color:var(--rose)}
+.hero-tagline{font-size:16px;color:var(--ink-lighter);margin-top:32px;letter-spacing:4px;opacity:0;animation:fadeInUp .8s ease 2.6s forwards}
+@keyframes fadeInUp{to{opacity:1;transform:translateY(0)}}
+.hero-subtitle,.hero-title,.hero-tagline{transform:translateY(30px)}
+
+.hero-scroll{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:12px;opacity:0;animation:fadeInUp .8s ease 2.8s forwards}
+.hero-scroll span{font-size:11px;letter-spacing:3px;color:var(--ink-lighter)}
+.scroll-line{width:1px;height:60px;background:linear-gradient(var(--rose),transparent);animation:scrollPulse 2s ease infinite}
+@keyframes scrollPulse{0%,100%{opacity:.3;transform:scaleY(.6)}50%{opacity:1;transform:scaleY(1)}}
+
+/* ===== 通用区块 ===== */
+section{padding:120px 48px;position:relative}
+.section-label{font-size:11px;letter-spacing:6px;text-transform:uppercase;color:var(--ink-lighter);margin-bottom:16px}
+.section-title{font-family:var(--font-display);font-size:clamp(32px,5vw,64px);font-weight:300;line-height:1.2;margin-bottom:60px;color:var(--ink)}
+.section-title em{font-style:italic;color:var(--rose)}
+
+/* ===== 关于/自我介绍 ===== */
+.about{display:grid;grid-template-columns:1fr 1fr;gap:80px;max-width:1400px;margin:0 auto;align-items:center}
+.about-visual{position:relative;height:560px}
+.about-img{width:100%;height:100%;object-fit:cover;border-radius:2px;filter:grayscale(20%)}
+.about-float{position:absolute;bottom:-30px;right:-30px;width:200px;height:200px;background:var(--cream);border:1px solid var(--mist);border-radius:2px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px;box-shadow:0 20px 60px rgba(0,0,0,.06)}
+.about-float .num{font-family:var(--font-display);font-size:48px;font-weight:300;color:var(--rose)}
+.about-float .label{font-size:11px;letter-spacing:3px;color:var(--ink-lighter)}
+.about-text h3{font-family:var(--font-display);font-size:28px;font-weight:400;margin-bottom:24px;line-height:1.5}
+.about-text h3 em{font-style:italic;color:var(--rose)}
+.about-text p{font-size:15px;line-height:2;color:var(--ink-light);margin-bottom:20px;font-weight:300}
+.about-keywords{display:flex;flex-wrap:wrap;gap:12px;margin-top:32px}
+.about-keywords span{padding:8px 20px;border:1px solid var(--mist);border-radius:20px;font-size:12px;letter-spacing:2px;color:var(--ink-lighter);transition:all .3s}
+.about-keywords span:hover{background:var(--rose);color:white;border-color:var(--rose)}
+
+/* ===== 作品集通用 ===== */
+.portfolio-grid{display:grid;gap:32px;max-width:1400px;margin:0 auto}
+.portfolio-grid.col-2{grid-template-columns:1fr 1fr}
+.portfolio-grid.col-3{grid-template-columns:1fr 1fr 1fr}
+
+.portfolio-card{position:relative;overflow:hidden;border-radius:2px;cursor:pointer;group:true}
+.portfolio-card .card-img{width:100%;aspect-ratio:4/3;object-fit:cover;transition:transform .8s cubic-bezier(.25,.46,.45,.94), filter .6s}
+.portfolio-card:hover .card-img{transform:scale(1.06);filter:brightness(.85)}
+.portfolio-card .card-overlay{position:absolute;inset:0;background:linear-gradient(transparent 40%,rgba(44,44,44,.85));display:flex;flex-direction:column;justify-content:flex-end;padding:32px;opacity:0;transition:opacity .5s}
+.portfolio-card:hover .card-overlay{opacity:1}
+.card-overlay .card-cat{font-size:11px;letter-spacing:3px;color:var(--rose-light);margin-bottom:8px;text-transform:uppercase}
+.card-overlay .card-name{font-family:var(--font-display);font-size:22px;color:white;font-weight:400}
+.card-overlay .card-desc{font-size:13px;color:rgba(255,255,255,.6);margin-top:8px;line-height:1.6}
+.card-overlay .card-arrow{position:absolute;right:32px;bottom:32px;width:40px;height:40px;border:1px solid rgba(255,255,255,.3);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .3s}
+.card-overlay .card-arrow svg{width:16px;height:16px;stroke:white;fill:none;stroke-width:1.5}
+.portfolio-card:hover .card-arrow{background:var(--rose);border-color:var(--rose)}
+
+/* 特色大卡片 */
+.portfolio-card.featured{grid-column:span 2}
+.portfolio-card.featured .card-img{aspect-ratio:16/7}
+
+/* ===== 交互设计区 ===== */
+.interactive-section{background:var(--cream-dark)}
+.interactive-demo{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center}
+.demo-phone{width:280px;height:560px;border-radius:36px;background:var(--ink);padding:12px;margin:0 auto;position:relative;box-shadow:0 40px 80px rgba(0,0,0,.15)}
+.phone-screen{width:100%;height:100%;border-radius:26px;background:#1a1a2e;overflow:hidden;position:relative}
+.phone-notch{width:120px;height:24px;background:var(--ink);border-radius:0 0 16px 16px;position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:2}
+.phone-content{padding:40px 20px 20px;height:100%;display:flex;flex-direction:column;gap:16px}
+.phone-card{background:rgba(255,255,255,.08);border-radius:12px;padding:16px;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.06);transition:transform .3s}
+.phone-card:hover{transform:translateX(8px)}
+.phone-card h4{color:white;font-size:13px;font-weight:400;margin-bottom:6px}
+.phone-card p{color:rgba(255,255,255,.4);font-size:11px;line-height:1.5}
+.phone-card .dot{width:8px;height:8px;border-radius:50%;background:var(--rose);display:inline-block;margin-right:8px}
+
+.demo-info h3{font-family:var(--font-display);font-size:32px;font-weight:400;margin-bottom:20px;line-height:1.4}
+.demo-info p{font-size:15px;line-height:2;color:var(--ink-light);margin-bottom:16px;font-weight:300}
+.demo-tags{display:flex;gap:12px;margin-top:24px}
+.demo-tags span{padding:6px 16px;background:var(--cream);border-radius:20px;font-size:12px;letter-spacing:1px;color:var(--ink-lighter)}
+
+/* ===== 空间设计区 ===== */
+.space-gallery{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:auto auto;gap:24px}
+.space-item{position:relative;overflow:hidden;border-radius:2px}
+.space-item.tall{grid-row:span 2}
+.space-item .space-img{width:100%;height:100%;object-fit:cover;transition:transform 1s cubic-bezier(.25,.46,.45,.94)}
+.space-item:hover .space-img{transform:scale(1.08)}
+.space-item .space-label{position:absolute;bottom:0;left:0;right:0;padding:24px;background:linear-gradient(transparent,rgba(0,0,0,.7));transform:translateY(100%);transition:transform .5s}
+.space-item:hover .space-label{transform:translateY(0)}
+.space-label span{font-size:11px;letter-spacing:3px;color:var(--rose-light)}
+.space-label h4{font-family:var(--font-display);font-size:18px;color:white;font-weight:400;margin-top:4px}
+
+/* ===== 平面设计区 ===== */
+.graphic-section{background:var(--ink);color:white}
+.graphic-section .section-label{color:var(--rose-light)}
+.graphic-section .section-title{color:white}
+.graphic-section .section-title em{color:var(--rose)}
+.graphic-scroll{display:flex;gap:32px;overflow-x:auto;padding:20px 0 40px;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+.graphic-scroll::-webkit-scrollbar{height:2px}
+.graphic-scroll::-webkit-scrollbar-track{background:rgba(255,255,255,.05)}
+.graphic-scroll::-webkit-scrollbar-thumb{background:var(--rose)}
+.graphic-item{flex:0 0 360px;scroll-snap-align:start;position:relative;border-radius:2px;overflow:hidden}
+.graphic-item img{width:100%;aspect-ratio:3/4;object-fit:cover;transition:transform .8s}
+.graphic-item:hover img{transform:scale(1.05)}
+.graphic-item .g-info{position:absolute;inset:0;background:linear-gradient(transparent 50%,rgba(0,0,0,.8));display:flex;flex-direction:column;justify-content:flex-end;padding:28px;opacity:0;transition:opacity .4s}
+.graphic-item:hover .g-info{opacity:1}
+.g-info span{font-size:11px;letter-spacing:3px;color:var(--rose-light)}
+.g-info h4{font-family:var(--font-display);font-size:20px;color:white;font-weight:400;margin-top:6px}
+
+/* ===== 简历区 ===== */
+.resume{max-width:1000px;margin:0 auto}
+.resume-timeline{position:relative;padding-left:60px}
+.resume-timeline::before{content:'';position:absolute;left:20px;top:0;bottom:0;width:1px;background:var(--mist)}
+.resume-item{position:relative;margin-bottom:60px;opacity:0;transform:translateY(30px);transition:all .6s}
+.resume-item.visible{opacity:1;transform:translateY(0)}
+.resume-item::before{content:'';position:absolute;left:-47px;top:8px;width:14px;height:14px;border:2px solid var(--rose);border-radius:50%;background:var(--cream);transition:background .3s}
+.resume-item:hover::before{background:var(--rose)}
+.resume-year{font-family:var(--font-display);font-size:14px;color:var(--rose);letter-spacing:2px;margin-bottom:8px}
+.resume-role{font-family:var(--font-display);font-size:22px;font-weight:400;margin-bottom:4px}
+.resume-company{font-size:14px;color:var(--ink-lighter);letter-spacing:1px;margin-bottom:12px}
+.resume-desc{font-size:14px;line-height:1.9;color:var(--ink-light);font-weight:300}
+
+.resume-skills{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:80px}
+.skill-group h4{font-family:var(--font-display);font-size:18px;font-weight:400;margin-bottom:20px;color:var(--ink)}
+.skill-bar{margin-bottom:16px}
+.skill-bar .skill-name{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;color:var(--ink-light)}
+.skill-bar .bar{height:2px;background:var(--mist);border-radius:1px;position:relative;overflow:hidden}
+.skill-bar .bar-fill{height:100%;background:linear-gradient(90deg,var(--rose),var(--gold));border-radius:1px;transition:width 1.2s cubic-bezier(.25,.46,.45,.94);width:0}
+.skill-bar.visible .bar-fill{width:var(--w)}
+
+/* ===== 联系/Footer ===== */
+.contact{text-align:center;padding:120px 48px;background:var(--cream-dark)}
+.contact-title{font-family:var(--font-display);font-size:clamp(36px,6vw,72px);font-weight:300;margin-bottom:24px}
+.contact-title em{font-style:italic;color:var(--rose)}
+.contact-sub{font-size:15px;color:var(--ink-lighter);letter-spacing:2px;margin-bottom:48px}
+.contact-links{display:flex;justify-content:center;gap:40px;flex-wrap:wrap}
+.contact-links a{width:56px;height:56px;border:1px solid var(--mist);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .3s;text-decoration:none}
+.contact-links a svg{width:20px;height:20px;stroke:var(--ink-light);fill:none;stroke-width:1.5;transition:stroke .3s}
+.contact-links a:hover{background:var(--rose);border-color:var(--rose)}
+.contact-links a:hover svg{stroke:white}
+
+footer{padding:40px 48px;text-align:center;font-size:12px;letter-spacing:2px;color:var(--ink-lighter);border-top:1px solid var(--mist)}
+
+/* ===== 作品详情模态框 ===== */
+.modal{position:fixed;inset:0;z-index:2000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.7);backdrop-filter:blur(10px);opacity:0;transition:opacity .4s}
+.modal.active{display:flex;opacity:1}
+.modal-content{background:var(--cream);max-width:800px;width:90%;max-height:85vh;overflow-y:auto;border-radius:4px;transform:scale(.95);transition:transform .4s}
+.modal.active .modal-content{transform:scale(1)}
+.modal-header{position:relative}
+.modal-header img{width:100%;aspect-ratio:16/9;object-fit:cover}
+.modal-close{position:absolute;top:16px;right:16px;width:40px;height:40px;background:rgba(0,0,0,.4);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(10px)}
+.modal-close svg{width:18px;height:18px;stroke:white;fill:none;stroke-width:2}
+.modal-body{padding:40px}
+.modal-body h2{font-family:var(--font-display);font-size:28px;font-weight:400;margin-bottom:8px}
+.modal-body .modal-cat{font-size:12px;letter-spacing:3px;color:var(--rose);text-transform:uppercase;margin-bottom:20px}
+.modal-body p{font-size:15px;line-height:2;color:var(--ink-light);font-weight:300}
+
+/* ===== 滚动动画 ===== */
+.reveal{opacity:0;transform:translateY(40px);transition:all .8s cubic-bezier(.25,.46,.45,.94)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-left{opacity:0;transform:translateX(-40px);transition:all .8s cubic-bezier(.25,.46,.45,.94)}
+.reveal-left.visible{opacity:1;transform:translateX(0)}
+.reveal-right{opacity:0;transform:translateX(40px);transition:all .8s cubic-bezier(.25,.46,.45,.94)}
+.reveal-right.visible{opacity:1;transform:translateX(0)}
+
+/* ===== 装饰元素 ===== */
+.deco-circle{position:absolute;border-radius:50%;border:1px solid var(--mist);pointer-events:none;opacity:.3}
+.parallax-bg{position:absolute;width:400px;height:400px;border-radius:50%;filter:blur(80px);opacity:.15;pointer-events:none}
+
+/* ===== 响应式 ===== */
+@media(max-width:1024px){
+  section{padding:80px 32px}
+  .about{grid-template-columns:1fr;gap:40px}
+  .about-visual{height:400px}
+  .portfolio-grid.col-3{grid-template-columns:1fr 1fr}
+  .portfolio-card.featured{grid-column:span 1}
+  .portfolio-card.featured .card-img{aspect-ratio:4/3}
+  .interactive-demo{grid-template-columns:1fr}
+  .space-gallery{grid-template-columns:1fr 1fr}
+  .resume-skills{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  nav{padding:16px 24px}
+  .nav-links{display:none}
+  .menu-toggle{display:flex}
+  section{padding:60px 20px}
+  .about-visual{height:320px}
+  .about-float{width:140px;height:140px;bottom:-20px;right:-10px}
+  .about-float .num{font-size:36px}
+  .portfolio-grid.col-2,.portfolio-grid.col-3{grid-template-columns:1fr}
+  .portfolio-card.featured{grid-column:span 1}
+  .space-gallery{grid-template-columns:1fr}
+  .space-item.tall{grid-row:span 1}
+  .graphic-item{flex:0 0 280px}
+  .resume-timeline{padding-left:40px}
+  .resume-timeline::before{left:12px}
+  .resume-item::before{left:-39px}
+  .hero-title{letter-spacing:0}
+}
+
+/* ===== 页面过渡 ===== */
+.page-transition{position:fixed;inset:0;background:var(--rose);z-index:9999;transform:scaleY(0);transform-origin:bottom;transition:transform .6s cubic-bezier(.77,0,.175,1)}
+.page-transition.active{transform:scaleY(1);transform-origin:top}
+</style>
+</head>
+<body>
+
+<!-- 加载页 -->
+<div class="loader" id="loader">
+  <div class="loader-text" id="loaderText"></div>
+  <div class="loader-line"></div>
+</div>
+
+<!-- 自定义光标 -->
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- 页面过渡 -->
+<div class="page-transition" id="pageTransition"></div>
+
+<!-- 导航 -->
+<nav id="navbar">
+  <div class="nav-logo">PORTFOLIO</div>
+  <ul class="nav-links">
+    <li><a href="#about">关于</a></li>
+    <li><a href="#interactive">交互设计</a></li>
+    <li><a href="#space">空间设计</a></li>
+    <li><a href="#graphic">平面设计</a></li>
+    <li><a href="#resume">简历</a></li>
+  </ul>
+  <div class="menu-toggle" id="menuToggle">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- 移动端菜单 -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#about" onclick="closeMobile()">关于</a>
+  <a href="#interactive" onclick="closeMobile()">交互设计</a>
+  <a href="#space" onclick="closeMobile()">空间设计</a>
+  <a href="#graphic" onclick="closeMobile()">平面设计</a>
+  <a href="#resume" onclick="closeMobile()">简历</a>
+</div>
+
+<!-- Hero -->
+<section class="hero" id="hero">
+  <div class="hero-bg">
+    <canvas id="heroCanvas"></canvas>
+  </div>
+  <div class="parallax-bg" style="background:var(--rose);top:20%;left:-10%"></div>
+  <div class="parallax-bg" style="background:var(--gold);bottom:10%;right:-5%"></div>
+  <div class="hero-content">
+    <div class="hero-subtitle">Designer & Creative Thinker</div>
+    <h1 class="hero-title">Creative <em>Soul</em></h1>
+    <p class="hero-tagline">以设计为语言，以美学为信仰</p>
+  </div>
+  <div class="hero-scroll">
+    <span>SCROLL</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- 自我介绍 -->
+<section id="about">
+  <div class="about">
+    <div class="about-visual reveal-left">
+      <img class="about-img" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=800&fit=crop&crop=face" alt="portrait" onerror="this.style.background='linear-gradient(135deg,var(--rose-light),var(--mist))';this.style.minHeight='100%'">
+      <div class="about-float">
+        <div class="num">5+</div>
+        <div class="label">年设计经验</div>
+      </div>
+    </div>
+    <div class="about-text reveal-right">
+      <div class="section-label">About Me</div>
+      <h3>用设计的力量<br>创造 <em>有温度</em> 的体验</h3>
+      <p>我是一名跨领域设计师，专注于交互设计、空间设计与平面视觉。我相信好的设计不仅是视觉的呈现，更是情感的传递。每一个像素的移动，每一寸空间的留白，都蕴含着对美的思考与对用户的尊重。</p>
+      <p>在设计与艺术的交汇处，我寻找那些让人驻足的瞬间——当指尖触碰到屏幕时的愉悦，当脚步踏入空间时的宁静，当目光落在画面上的怦然。</p>
+      <div class="about-keywords">
+        <span>交互设计</span><span>空间叙事</span><span>视觉传达</span>
+        <span>用户体验</span><span>品牌设计</span><span>创意思维</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 交互设计 -->
+<section id="interactive" class="interactive-section">
+  <div class="reveal">
+    <div class="section-label">Interaction Design</div>
+    <h2 class="section-title">交互设计 — <em>触碰</em>之间的温度</h2>
+  </div>
+  <div class="interactive-demo">
+    <div class="demo-phone reveal-left">
+      <div class="phone-screen">
+        <div class="phone-notch"></div>
+        <div class="phone-content">
+          <div class="phone-card">
+            <span class="dot"></span>
+            <h4>手势交互研究</h4>
+            <p>探索指尖与屏幕之间的自然对话</p>
+          </div>
+          <div class="phone-card">
+            <span class="dot" style="background:var(--gold)"></span>
+            <h4>微交互动效</h4>
+            <p>用细节构建情感连接</p>
+          </div>
+          <div class="phone-card">
+            <span class="dot" style="background:#8ab4c9"></span>
+            <h4>信息架构</h4>
+            <p>让复杂变得优雅而清晰</p>
+          </div>
+          <div class="phone-card">
+            <span class="dot" style="background:#b8c98a"></span>
+            <h4>用户旅程设计</h4>
+            <p>每一步都值得期待</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="demo-info reveal-right">
+      <h3>让每一次触碰<br>都成为对话</h3>
+      <p>交互设计不仅仅是界面的排列组合，更是人与数字世界之间的情感纽带。我致力于创造那些让人会心一笑的交互瞬间——一个恰到好处的过渡动画，一个令人愉悦的手势反馈，一条清晰的信息路径。</p>
+      <p>从移动端到网页，从IoT到沉浸式体验，我追求的始终是：让技术退后，让体验上前。</p>
+      <div class="demo-tags">
+        <span>Figma</span><span>Protopie</span><span>Principle</span><span>Framer</span>
+      </div>
+    </div>
+  </div>
+  <div class="portfolio-grid col-2" style="margin-top:60px">
+    <div class="portfolio-card reveal" onclick="openModal('冥想APP','交互设计','一款帮助用户找到内心宁静的冥想应用，通过呼吸动画、声音景观与渐进式引导，创造沉浸式的正念体验。','https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&h=600&fit=crop')">
+      <img class="card-img" src="https://images.unsplash.com/photo-1551650975-87deedd944c3?w=800&h=600&fit=crop" alt="project" onerror="this.style.background='linear-gradient(135deg,#e8d5d3,#d4c5b5)';this.style.minHeight='100%'">
+      <div class="card-overlay">
+        <span class="card-cat">App Design</span>
+        <span class="card-name">冥想 APP</span>
+        <span class="card-desc">正念体验，呼吸之间</span>
+        <div class="card-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg></div>
+      </div>
+    </div>
+    <div class="portfolio-card reveal" onclick="openModal('智慧家居面板','交互设计','将复杂的智能家居控制化繁为简，用直觉式的手势操作和情境模式，让科技融入生活的温度。','https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&h=600&fit=crop')">
+      <img class="card-img" src="https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&h=600&fit=crop" alt="project" onerror="this.style.background='linear-gradient(135deg,#d4c5b5,#c9a4a0)';this.style.minHeight='100%'">
+      <div class="card-overlay">
+        <span class="card-cat">IoT Design</span>
+        <span class="card-name">智慧家居面板</span>
+        <span class="card-desc">科技与生活的温柔交汇</span>
+        <div class="card-arrow"><svg viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7V17"/></svg></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 空间设计 -->
+<section id="space">
+  <div class="reveal">
+    <div class="section-label">Space Design</div>
+    <h2 class="section-title">空间设计 — <em>留白</em>的诗意</h2>
+  </div>
+  <div class="space-gallery">
+    <div class="space-item tall reveal-left" onclick="openModal('茶室空间','空间设计','以"间"为概念的日式茶室设计，通过光影的层层递进，创造从喧嚣到宁静的过渡体验。','https://images.unsplash.com/photo-1585515320310-259814833e62?w=600&h=900&fit=crop')">
+      <img class="space-img" src="https://images.unsplash.com/photo-1585515320310-259814833e62?w=600&h=900&fit=crop" alt="space" onerror="this.style.background='linear-gradient(135deg,#e8d5d3,#f0ebe5)';this.style.minHeight='100%'">
+      <div class="space-label"><span>Interior</span><h4>茶室空间</h4></div>
+    </div>
+    <div class="space-item reveal" onclick="openModal('艺术展厅','空间设计','为当代艺术打造的沉浸式展厅，用流动的空间语言呼应艺术的呼吸。','https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&h=400&fit=crop')">
+      <img class="space-img" src="https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=600&h=400&fit=crop" alt="space" onerror="this.style.background='linear-gradient(135deg,#d4c5b5,#e8e2dc)';this.style.minHeight='100%'">
+      <div class="space-label"><span>Exhibition</span><h4>艺术展厅</h4></div>
+    </div>
+    <div class="space-item reveal" onclick="openModal('品牌旗舰店','空间设计','将品牌DNA转译为空间语言，让每一步都是一次品牌叙事的沉浸。','https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&h=400&fit=crop')">
+      <img class="space-img" src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=600&h=400&fit=crop" alt="space" onerror="this.style.background='linear-gradient(135deg,#c9a4a0,#d4c5b5)';this.style.minHeight='100%'">
+      <div class="space-label"><span>Retail</span><h4>品牌旗舰店</h4></div>
+    </div>
+    <div class="space-item reveal-right" onclick="openModal('光之庭院','空间设计','以"光"为材料的庭院空间设计，让自然光成为空间的第四维度。','https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=600&h=400&fit=crop')">
+      <img class="space-img" src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=600&h=400&fit=crop" alt="space" onerror="this.style.background='linear-gradient(135deg,#f0ebe5,#e8d5d3)';this.style.minHeight='100%'">
+      <div class="space-label"><span>Landscape</span><h4>光之庭院</h4></div>
+    </div>
+  </div>
+</section>
+
+<!-- 平面设计 -->
+<section id="graphic" class="graphic-section">
+  <div class="reveal">
+    <div class="section-label">Graphic Design</div>
+    <h2 class="section-title">平面设计 — <em>视觉</em>的韵律</h2>
+  </div>
+  <div class="graphic-scroll">
+    <div class="graphic-item" onclick="openModal('东方意境海报','平面设计','以水墨与留白构建东方美学海报系列，让传统意蕴在现代语境中重新呼吸。','https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=500&h=700&fit=crop')">
+      <img src="https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=500&h=700&fit=crop" alt="graphic" onerror="this.style.background='linear-gradient(135deg,#2c2c2c,#5a5a5a)';this.style.minHeight='100%'">
+      <div class="g-info"><span>Poster</span><h4>东方意境海报</h4></div>
+    </div>
+    <div class="graphic-item" onclick="openModal('花语品牌','平面设计','为高端花艺品牌打造的全套视觉识别系统，用柔美的色彩体系与精致的字体检视品牌气质。','https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=500&h=700&fit=crop')">
+      <img src="https://images.unsplash.com/photo-1558655146-9f40138edfeb?w=500&h=700&fit=crop" alt="graphic" onerror="this.style.background='linear-gradient(135deg,#5a5a5a,#8a8a8a)';this.style.minHeight='100%'">
+      <div class="g-info"><span>Branding</span><h4>花语品牌</h4></div>
+    </div>
+    <div class="graphic-item" onclick="openModal('城市之声','平面设计','音乐节视觉设计，用声波的视觉化与城市的几何感，碰撞出视听的双重盛宴。','https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=500&h=700&fit=crop')">
+      <img src="https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=500&h=700&fit=crop" alt="graphic" onerror="this.style.background='linear-gradient(135deg,#a07874,#c9a4a0)';this.style.minHeight='100%'">
+      <div class="g-info"><span>Event</span><h4>城市之声</h4></div>
+    </div>
+    <div class="graphic-item" onclick="openModal('节气物语','平面设计','二十四节气主题插画系列，用现代插画手法重新诠释古老的时间诗意。','https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=500&h=700&fit=crop')">
+      <img src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=500&h=700&fit=crop" alt="graphic" onerror="this.style.background='linear-gradient(135deg,#c4a265,#d4c5b5)';this.style.minHeight='100%'">
+      <div class="g-info"><span>Illustration</span><h4>节气物语</h4></div>
+    </div>
+    <div class="graphic-item" onclick="openModal('无界杂志','平面设计','独立杂志版式设计，用大胆的排版实验与克制的色彩，定义新世代的阅读美学。','https://images.unsplash.com/photo-1561070791-2526d30994b5?w=500&h=700&fit=crop')">
+      <img src="https://images.unsplash.com/photo-1561070791-2526d30994b5?w=500&h=700&fit=crop" alt="graphic" onerror="this.style.background='linear-gradient(135deg,#8a8a8a,#2c2c2c)';this.style.minHeight='100%'">
+      <div class="g-info"><span>Editorial</span><h4>无界杂志</h4></div>
+    </div>
+  </div>
+</section>
+
+<!-- 简历 -->
+<section id="resume">
+  <div class="reveal">
+    <div class="section-label">Resume</div>
+    <h2 class="section-title">简历 — <em>旅程</em>的印记</h2>
+  </div>
+  <div class="resume">
+    <div class="resume-timeline">
+      <div class="resume-item">
+        <div class="resume-year">2024 — 至今</div>
+        <div class="resume-role">高级交互设计师</div>
+        <div class="resume-company">某知名设计工作室</div>
+        <div class="resume-desc">主导多个核心产品的交互设计，建立设计系统与组件库，推动设计规范的统一落地。负责跨团队设计协作，将用户体验指标提升40%。</div>
+      </div>
+      <div class="resume-item">
+        <div class="resume-year">2022 — 2024</div>
+        <div class="resume-role">空间设计师</div>
+        <div class="resume-company">创意空间设计事务所</div>
+        <div class="resume-desc">负责商业空间与展览空间的设计，将品牌叙事融入空间体验。作品曾入选米兰设计周、中国设计大展，获得多项设计奖项。</div>
+      </div>
+      <div class="resume-item">
+        <div class="resume-year">2020 — 2022</div>
+        <div class="resume-role">平面设计师</div>
+        <div class="resume-company">品牌创意机构</div>
+        <div class="resume-desc">为多个国内外品牌打造视觉识别系统，涵盖品牌标识、包装设计、海报设计及品牌策略。作品在D&AD、Tokyo TDC等国际赛事中获奖。</div>
+      </div>
+      <div class="resume-item">
+        <div class="resume-year">2016 — 2020</div>
+        <div class="resume-role">设计学学士</div>
+        <div class="resume-company">中央美术学院</div>
+        <div class="resume-desc">主修视觉传达设计，辅修空间设计。毕业设计获学院一等奖，期间参与多个设计工作坊与国际交流项目。</div>
+      </div>
+    </div>
+    <div class="resume-skills">
+      <div class="skill-group">
+        <h4>设计工具</h4>
+        <div class="skill-bar"><div class="skill-name"><span>Figma</span><span>95%</span></div><div class="bar"><div class="bar-fill" style="--w:95%"></div></div></div>
+        <div class="skill-bar"><div class="skill-name"><span>Sketch</span><span>90%</span></div><div class="bar"><div class="bar-fill" style="--w:90%"></div></div></div>
+        <div class="skill-bar"><div class="skill-name"><span>Adobe Creative Suite</span><span>92%</span></div><div class="bar"><div class="bar-fill" style="--w:92%"></div></div></div>
+        <div class="skill-bar"><div class="skill-name"><span>Cinema 4D</span><span>78%</span></div><div class="bar"><div class="bar-fill" style="--w:78%"></div></div></div>
+        <div class="skill-bar"><div class="skill-name"><span>AutoCAD / SketchUp</span><span>85%</span></div><div class="bar"><div class="bar-fill" style="--w:85%"></div></div></div>
+      </div>
+      <div class="skill-group">
+        <h4>核心能力</h4>
+        <div class="skill-bar"><div class="skill-name"><span>交互设计</span><span>95%</span></div><div class="bar"><div class="bar-fill" style="--w:95%"></div></div></div>
+        <div class="skill-bar"><div class="skill-name"><span>空间设计</span><span>88%</span></div><div class="bar"><div class="bar-fill" style="--w:88%"></div></div></div>
+        <div class="skill-bar"><div class="skill-name"><span>视觉传达</span><span>92%</span></div><div class="bar"><div class="bar-fill" style="--w:92%"></div></div></div>
+        <div class="skill-bar"><div class="skill-name"><span>用户研究</span><span>85%</span></div><div class="bar"><div class="bar-fill" style="--w:85%"></div></div></div>
+        <div class="skill-bar"><div class="skill-name"><span>设计策略</span><span>80%</span></div><div class="bar"><div class="bar-fill" style="--w:80%"></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 联系 -->
+<section class="contact" id="contact">
+  <div class="reveal">
+    <div class="section-label">Get In Touch</div>
+    <h2 class="contact-title">让我们一起<br><em>创造</em>些什么</h2>
+    <p class="contact-sub">期待与你的每一次对话</p>
+    <div class="contact-links">
+      <a href="mailto:hello@portfolio.com" title="Email">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </a>
+      <a href="#" title="Dribbble">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>
+      </a>
+      <a href="#" title="Behance">
+        <svg viewBox="0 0 24 24"><path d="M1 12h6.5c1.93 0 3.5-1.57 3.5-3.5S9.43 5 7.5 5H1v14h7c2.21 0 4-1.79 4-4s-1.79-4-4-4"/><path d="M15 13c0-2.76 2.24-5 5-5s5 2.24 5 5"/><line x1="15" y1="17" x2="25" y2="17"/><path d="M20 8c1.1 0 2-.9 2-2"/></svg>
+      </a>
+      <a href="#" title="LinkedIn">
+        <svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>© 2026 Portfolio — Designed with passion</p>
+</footer>
+
+<!-- 模态框 -->
+<div class="modal" id="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <img id="modalImg" src="" alt="project">
+      <button class="modal-close" onclick="closeModal()">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-cat" id="modalCat"></div>
+      <h2 id="modalTitle"></h2>
+      <p id="modalDesc"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== 加载动画 =====
+const loaderText = document.getElementById('loaderText');
+const text = 'CREATIVE SOUL';
+text.split('').forEach((char, i) => {
+  const span = document.createElement('span');
+  span.textContent = char === ' ' ? '\u00A0' : char;
+  span.style.animationDelay = `${i * 0.08}s`;
+  loaderText.appendChild(span);
+});
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('loader').classList.add('hidden'), 2000);
+});
+
+// ===== 自定义光标 =====
+const dot = document.getElementById('cursorDot');
+const ring = document.getElementById('cursorRing');
+let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+document.addEventListener('mousemove', e => {
+  mouseX = e.clientX; mouseY = e.clientY;
+  dot.style.left = mouseX - 4 + 'px';
+  dot.style.top = mouseY - 4 + 'px';
+});
+function animateRing() {
+  ringX += (mouseX - ringX) * 0.15;
+  ringY += (mouseY - ringY) * 0.15;
+  ring.style.left = ringX - 20 + 'px';
+  ring.style.top = ringY - 20 + 'px';
+  requestAnimationFrame(animateRing);
+}
+animateRing();
+// 光标在可点击元素上变大
+document.querySelectorAll('a, .portfolio-card, .space-item, .graphic-item, .phone-card, .about-keywords span').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    ring.style.width = '60px'; ring.style.height = '60px';
+    ring.style.transform = 'translate(-20px,-20px)';
+    dot.style.transform = 'scale(1.5)';
+  });
+  el.addEventListener('mouseleave', () => {
+    ring.style.width = '40px'; ring.style.height = '40px';
+    ring.style.transform = 'translate(-16px,-16px)';
+    dot.style.transform = 'scale(1)';
+  });
+});
+// 移动端隐藏光标
+if ('ontouchstart' in window) {
+  dot.style.display = 'none';
+  ring.style.display = 'none';
+}
+
+// ===== Hero Canvas 粒子 =====
+const canvas = document.getElementById('heroCanvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+class Particle {
+  constructor() {
+    this.reset();
+  }
+  reset() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * canvas.height;
+    this.size = Math.random() * 2 + 0.5;
+    this.speedX = (Math.random() - 0.5) * 0.3;
+    this.speedY = (Math.random() - 0.5) * 0.3;
+    this.opacity = Math.random() * 0.3 + 0.05;
+  }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    if (this.x < 0 || this.x > canvas.width || this.y < 0 || this.y > canvas.height) this.reset();
+  }
+  draw() {
+    ctx.beginPath();
+    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(201,164,160,${this.opacity})`;
+    ctx.fill();
+  }
+}
+for (let i = 0; i < 80; i++) particles.push(new Particle());
+
+function drawLines() {
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 150) {
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = `rgba(201,164,160,${0.06 * (1 - dist / 150)})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+}
+
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => { p.update(); p.draw(); });
+  drawLines();
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// ===== 导航滚动效果 =====
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// ===== 移动端菜单 =====
+document.getElementById('menuToggle').addEventListener('click', () => {
+  document.getElementById('mobileMenu').classList.toggle('active');
+});
+function closeMobile() {
+  document.getElementById('mobileMenu').classList.remove('active');
+}
+
+// ===== 滚动显示动画 =====
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' });
+
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .resume-item, .skill-bar').forEach(el => observer.observe(el));
+
+// ===== 模态框 =====
+function openModal(title, cat, desc, img) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalCat').textContent = cat;
+  document.getElementById('modalDesc').textContent = desc;
+  document.getElementById('modalImg').src = img;
+  const modal = document.getElementById('modal');
+  modal.style.display = 'flex';
+  requestAnimationFrame(() => modal.classList.add('active'));
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  const modal = document.getElementById('modal');
+  modal.classList.remove('active');
+  setTimeout(() => { modal.style.display = 'none'; }, 400);
+  document.body.style.overflow = '';
+}
+document.getElementById('modal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+// ===== 平滑滚动 =====
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+// ===== 手机卡片动画 =====
+document.querySelectorAll('.phone-card').forEach((card, i) => {
+  card.style.opacity = '0';
+  card.style.transform = 'translateX(-20px)';
+  const obs = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) {
+      setTimeout(() => {
+        card.style.transition = 'all 0.6s cubic-bezier(.25,.46,.45,.94)';
+        card.style.opacity = '1';
+        card.style.transform = 'translateX(0)';
+      }, i * 200);
+      obs.unobserve(card);
+    }
+  }, { threshold: 0.3 });
+  obs.observe(card);
+});
+</script>
+</body>
+</html>
